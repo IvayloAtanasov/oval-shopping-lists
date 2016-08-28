@@ -1,0 +1,17 @@
+{
+  "name": "dagoyadem",
+  "version": "0.0.1",
+  "description": "Web app whose purpose in life is to help me avoid hunger.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "food",
+    "recipies",
+    "tvaaslisam"
+  ],
+  "author": "aivo",
+  "license": "ISC"
+}

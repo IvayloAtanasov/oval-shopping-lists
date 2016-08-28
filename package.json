@@ -13,5 +13,9 @@
     "tvaaslisam"
   ],
   "author": "aivo",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "knex": "^0.11.10",
+    "mysql": "^2.11.1"
+  }
 }

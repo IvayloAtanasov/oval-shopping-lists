@@ -1,0 +1,26 @@
+{
+  "name": "dagoyadem",
+  "description": "Web app whose purpose in life is to help me avoid hunger.",
+  "main": "app.js",
+  "authors": [
+    "aivo"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "food",
+    "recipies",
+    "tvaaslisam"
+  ],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "milligram": "^1.1.0"
+  }
+}

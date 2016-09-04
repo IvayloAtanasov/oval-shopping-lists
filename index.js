@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 
-app.use(express.static('public'));
+app.use(express.static('public/bin'));
 
 // parse request params into req.body
 app.use(bodyParser.urlencoded({
@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(__dirname + '/public/bin/index.html');
 });
 
 app.listen(8080, () => console.log('API listening on port 8080'));

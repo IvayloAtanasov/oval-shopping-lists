@@ -1,8 +1,15 @@
 const oval = require('organic-oval')
+const recipes = require('../models/recipes')
 
 class RecipeList {
   constructor(rootEl, props, attrs) {
     oval.BaseTag(this, rootEl, props, attrs)
+
+    this.recipes = [];
+    recipes.get().then((recipes) => {
+      this.recipes = recipes
+      this.update()
+    })
   }
 
   render(createElement) {
@@ -17,18 +24,14 @@ class RecipeList {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Stephen Curry</td>
-            <td>27</td>
-            <td>1,91</td>
-            <td>1,91</td>
-          </tr>
-          <tr>
-            <td>Klay Thompson</td>
-            <td>25</td>
-            <td>2,01</td>
-            <td>2,01</td>
-          </tr>
+          <each recipe, index in {this.recipes}>
+            <tr>
+              <td>{recipe.name}</td>
+              <td>{recipe.category}</td>
+              <td>{recipe.timeToCook}</td>
+              <td><button class="button button-clear">Редактирай</button></td>
+            </tr>
+          </each>
         </tbody>
       </table>
     )

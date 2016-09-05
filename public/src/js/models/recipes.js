@@ -6,14 +6,18 @@ class Recipes extends Base {
   }
 
   get() {
-    return new Promise((resolve, reject) => {
-      // TODO
-      resolve([
-        {name: 'recipe 1', category: 'Dinner', timeToCook: 40}, 
-        {name: 'recipe 2', category: 'Breakfast', timeToCook: 120}, 
-        {name: 'recipe 3', category: 'Dinner', timeToCook: 60}
-    ]);
-    })
+    // TODO: base error handling
+      /*{
+        "id": Number,
+        "name": "String",
+        "description": "String",
+        "minutesToCook": Number,
+        "categoryId": Number,
+        "category": "String"
+      },*/
+      return fetch('http://localhost:8080/api/recipes')
+        .then(res => res.json());
+
   }
 }
 

@@ -28,7 +28,7 @@ class RecipeList {
             <tr>
               <td>{recipe.name}</td>
               <td>{recipe.category}</td>
-              <td>{recipe.timeToCook}</td>
+              <td>{recipe.minutesToCook}</td>
               <td><button class="button button-clear">Редактирай</button></td>
             </tr>
           </each>

@@ -18,4 +18,35 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/bin/index.html');
 });
 
+app.get('/api/recipes', (req, res) => {
+    knex
+        .select(
+            '*', 
+            'recipes.name as recipe_name', 
+            'categories.name as category_name'
+        )
+        .from('recipes')
+        .leftJoin('categorisables', function() {
+            this.on('recipes.id', '=', 'categorisables.categorisable_id')
+                .on(knex.raw("'recipes' = categorisables.categorisable_type"))
+        })
+        .leftJoin('categories', 'categorisables.category_id', 'categories.id')
+        .then((recipes) => {
+            // format response
+            recipes = recipes.map((recipe) => {
+                return {
+                    id: recipe.id,
+                    name: recipe.recipe_name,
+                    description: recipe.description,
+                    minutesToCook: recipe.minutes_to_cook,
+                    categoryId: recipe.category_id,
+                    category: recipe.category_name
+                };
+            });
+            res
+                .status(200)
+                .json(recipes);
+        });
+})
+
 app.listen(8080, () => console.log('API listening on port 8080'));

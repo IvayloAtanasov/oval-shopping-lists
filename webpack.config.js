@@ -1,31 +1,32 @@
-var webpack = require('webpack');
+var webpack = require('webpack')
 
 module.exports = {
-  'entry': './public/src/js/app',
+  'entry': ['babel-polyfill', './public/src/js/app'],
   'output': {
     path: __dirname + '/public/bin',
     filename: 'bundle.js'
   },
-  /*'resolve': {
+  'resolve': {
     'extensions': ['', '.webpack.js', '.web.js', '.tag', '.js'],
     'modulesDirectories': ['web_modules', 'node_modules']
-  },*/
-  /*'plugins': [
+  },
+  'plugins': [
     new webpack.ProvidePlugin({
       'oval': 'organic-oval'
     })
-  ],*/
+  ],
   'module': {
-    /*'preLoaders': [
+    'preLoaders': [
       {
-        test: /\.tag$/,
+        test: /\.js$/,
         exclude: /node_modules/,
         loaders: [
-          'organic-oval/webpack/oval-loader',
+          // turned off due to a weird syntax error when parsing
+          //'organic-oval/webpack/oval-loader',
           'organic-oval/webpack/oval-control-statements-loader'
         ]
       }
-    ],*/
+    ],
     'loaders': [
       {
         test: /\.js$|\.tag$/,
@@ -40,4 +41,4 @@ module.exports = {
       }
     ]
   }
-};
+}

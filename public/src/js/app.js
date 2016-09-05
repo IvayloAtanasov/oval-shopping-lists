@@ -2,16 +2,19 @@ const oval = require('organic-oval')
 oval.init()
 
 require('./inner-tag')
+require('./app-header')
+require('./home')
+require('./app-footer')
 
-class Component {
-  constructor(tagName, root) {
-    oval.BaseTag(this, tagName, root)
+class App {
+  constructor(rootEl, props, attrs) {
+    oval.BaseTag(this, rootEl, props, attrs)
 
     this.items = [1, 2, 3]
   }
 
   show() {
-    return false;
+    return false
   }
 
   render(createElement) {
@@ -30,10 +33,15 @@ class Component {
             </each>
           </ul>
           <inner-tag></inner-tag>
+
+          <app-header></app-header>
+          <home></home>
+          <app-footer></app-footer>
       </div>
     )
   }
 }
 
-oval.registerTag('app', Component)
+oval.registerTag('app', App)
+
 oval.mountAll(document.body)

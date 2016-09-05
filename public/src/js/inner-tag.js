@@ -1,8 +1,8 @@
 const oval = require('organic-oval')
 
 class InnerTag {
-  constructor(tagName, root) {
-    oval.BaseTag(this, tagName, root)
+  constructor(rootEl, props, attrs) {
+    oval.BaseTag(this, rootEl, props, attrs)
   }
 
   render(createElement) {

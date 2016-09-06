@@ -2,62 +2,59 @@ const oval = require('organic-oval')
 const Navigo = require('navigo')
 oval.init()
 
-require('./inner-tag')
 require('./app-header')
 require('./home')
+require('./recipe-addedit')
 require('./app-footer')
-
 
 class App {
   constructor(rootEl, props, attrs) {
     oval.BaseTag(this, rootEl, props, attrs)
 
-    this.items = [1, 2, 3]
-
-    this.state;
-    var router = oval.router = new Navigo()
-    router.on({
-        '/away': () => {
-          console.log('away')
-          this.state = 'away'
+    oval.router = new Navigo()
+    oval.router.state = null
+    oval.router.on({
+      '/recipe/add': {
+        as: 'recipe.add',
+        uses: () => {
+          oval.router.state = 'recipe.add'
           this.update()
-        },
-        '*': () => {
-          console.log('home')
-          this.state = 'home'
+        }
+      },
+      '/recipe/:id/edit': {
+        as: 'recipe.edit',
+        uses: () => {
+          oval.router.state = 'recipe.edit'
           this.update()
-        },
+        }
+      },
+      '/recipe/:id': {
+        as: 'recipe.show',
+        uses: () => {
+          oval.router.state = 'recipe.show'
+          this.update()
+        }
+      },
+      '*': {
+        as: 'home',
+        uses: () => {
+          oval.router.state = 'home'
+          this.update()
+        }
+      },
     })
     .resolve() // Note: no code executes after resolve()
-  }
-
-  show() {
-    return false
   }
 
   render(createElement) {
     return (
       <div>
-          <h1 if={this.show()} style="color: red; text-align: center">
-            Hello Organic World Hidden!
-          </h1>
-          <h1 if={!this.show()} style="color: green; text-align: center">
-            Hello Organic World omg omg omg its working!
-          </h1>
+        <app-header></app-header>
 
-          <ul>
-            <each itemValue, itemIndex in {this.items}>
-              <li>{itemIndex} - {itemValue}</li>
-            </each>
-          </ul>
-          <inner-tag></inner-tag>
+        <home if={oval.router.state === 'home'}></home>
+        <recipe-addedit if={oval.router.state === 'recipe.add'}></recipe-addedit>
 
-          <app-header></app-header>
-          <home if={this.state === 'home'}></home>
-          <div if={this.state === 'away'}>
-            <h1 style="color: blue; text-align: center">Away tab</h1>
-          </div>
-          <app-footer></app-footer>
+        <app-footer></app-footer>
       </div>
     )
   }

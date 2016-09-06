@@ -17,7 +17,7 @@ class RecipeSearch {
                 </fieldset>
               </div>
               <div class="column column-25">
-                <button class="button button-outline">Добави нова</button>
+                <a href={`#${oval.router.generate('recipe.add')}`} class="button button-outline" data-navigo>Добави нова</a>
               </div>
             </div>
           </div>

@@ -6,7 +6,6 @@ class Recipes extends Base {
   }
 
   get() {
-    // TODO: base error handling
       /*{
         "id": Number,
         "name": "String",
@@ -15,9 +14,19 @@ class Recipes extends Base {
         "categoryId": Number,
         "category": "String"
       },*/
-      return fetch('http://localhost:8080/api/recipes')
-        .then(res => res.json());
+      return this.fetch('/recipes')
+  }
 
+  create(recipe) {
+    return fetch('/users', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(recipe)
+    })
+    .then((res) => console.log(res))
   }
 }
 

@@ -47,6 +47,28 @@ app.get('/api/recipes', (req, res) => {
                 .status(200)
                 .json(recipes);
         });
-})
+});
+
+app.get('/api/categories', (req, res) => {
+    knex
+        .select()
+        .from('categories')
+        .then(categories => {
+            res
+                .status(200)
+                .json(categories);
+        })
+});
+
+app.get('/api/products', (req, res) => {
+    knex
+        .select()
+        .from('products')
+        .then(products => {
+            res
+                .status(200)
+                .json(products);
+        })
+});
 
 app.listen(8080, () => console.log('API listening on port 8080'));

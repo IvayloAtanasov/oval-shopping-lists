@@ -1,4 +1,7 @@
 const oval = require('organic-oval')
+const recipes = require('../models/recipes')
+const categories = require('../models/categories')
+const products = require('../models/products')
 
 class RecipeAddedit {
   constructor(rootEl, props, attrs) {
@@ -11,12 +14,80 @@ class RecipeAddedit {
 
     this.submit = (e) => {
       e.preventDefault()
-      console.log(this.refs)
+
+      // extract values from input ref objects
+      let values = {}
+      const inputs = this.refs
+      Object.keys(inputs).forEach((key) => {
+        values[key] = inputs[key].value
+      })
+
+      // format category
+      let category = {
+        id: null,
+        name: null
+      }
+      // if category is new, the name will be passed
+      if (isNaN(values.category)) {
+        category.name = values.category
+      } else {
+        category.id = values.category
+      }
+
+      // format products and quantities
+      let products = []
+      const productKeys = Object.keys(values).filter((key) => key.startsWith('product-'))
+      const quantityKeys = Object.keys(values).filter((key) => key.startsWith('productQty-'))
+      productKeys.forEach((key) => {
+          //values.push(o[key]);
+          //{id, name, qty}
+          let product = {
+            id: null,
+            name: null,
+            qty: null
+          }
+          // TODO: this repeats the code above
+          if (isNaN(values[key])) {
+            product.name = values[key]
+          } else {
+            product.id = values[key]
+          }
+          // insert on position extracted from key
+          const position = key.split('-')[1]
+          products.splice(position, 0, product)
+      })
+      quantityKeys.forEach((key) => {
+        const position = key.split('-')[1]
+        products[position].qty = values[key]
+      })
+
+      // build recipe object
+      let recipe = {
+        recipeName: values.recipeName,
+        recipeDescription: values.recipeDescription,
+        minutesToCook: values.minutesToCook,
+        category: category,
+        products: products
+      }
+
+      recipes.create(recipe)
     }
 
-    this.products = [{}]
+    this.addProductRow = () => {
+      this.products.push({})
+      this.update()
+    }
 
-    this.allProducts = [{id: 1, name: 'Морков', qty: '20 кг.'}, {id: 2, name: 'Сметана', qty: '500 гр.'}]
+    // load products and categories in datalists
+    this.categories = []
+    this.products = [{}]
+    this.allProducts = []
+    const categoriesPromise = categories.get()
+      .then(categories => this.categories = categories)
+    const productsPromise = products.get()
+      .then(products => this.allProducts = products)
+    Promise.all([categoriesPromise, productsPromise])
+      .then(() => this.update())
   }
 
   render(createElement) {
@@ -29,19 +100,24 @@ class RecipeAddedit {
               <input type="text" placeholder="Пълнени чушки (not to be confused with пиперки)" id="recipeName" ref="recipeName" />
               <label for="recipeDescription">Описание</label>
               <textarea placeholder="Намери си чушки..." id="recipeDescription" ref="recipeDescription"></textarea>
-              <label for="cookingTime">Време за приготвяне (в минути)</label>
-              <input type="number" placeholder="30" id="cookingTime" ref="cookingTime" />
+              <label for="minutesToCook">Време за приготвяне (в минути)</label>
+              <input type="number" placeholder="30" id="minutesToCook" ref="minutesToCook" />
               
-              <input type="text" list="category" ref="categoryId" />
+              <input type="text" list="category" ref="category" />
               <datalist id="category">
-                <option value="1">Вечеря</option>
+                <each category, index in {this.categories}>
+                  <option value={category.id}>{category.name}</option>
+                </each>
               </datalist>
-
 
               <each product, index in {this.products}>
                 <div class="row">
-                  <input type="text" list="products" ref="productId" />
-                  <input type="text" placeholder="100 кг" ref="productQty" />
+                  <div class="column column-80">
+                    <input type="text" list="products" ref={`product-${index}`} />
+                  </div>
+                  <div class="column column-15 column-offset-5">
+                    <input type="text" placeholder="100 кг" ref={`productQty-${index}`} />
+                  </div>
                 </div>
               </each>
               <datalist id="products">
@@ -49,6 +125,14 @@ class RecipeAddedit {
                   <option value={product.id}>{product.name}</option>
                 </each>
               </datalist>
+
+              <div class="row">
+                <div class="column column-10 column-offset-90">
+                  <div class="float-right">
+                    <button type="button" class="button button-outline" onclick={this.addProductRow}>&#10133;</button>
+                  </div>
+                </div>
+              </div>
 
               <div>
                 <input type="checkbox" id="confirmField" />

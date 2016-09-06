@@ -1,4 +1,5 @@
 const oval = require('organic-oval')
+const Navigo = require('navigo')
 oval.init()
 
 require('./inner-tag')
@@ -6,11 +7,28 @@ require('./app-header')
 require('./home')
 require('./app-footer')
 
+
 class App {
   constructor(rootEl, props, attrs) {
     oval.BaseTag(this, rootEl, props, attrs)
 
     this.items = [1, 2, 3]
+
+    this.state;
+    var router = oval.router = new Navigo()
+    router.on({
+        '/away': () => {
+          console.log('away')
+          this.state = 'away'
+          this.update()
+        },
+        '*': () => {
+          console.log('home')
+          this.state = 'home'
+          this.update()
+        },
+    })
+    .resolve() // Note: no code executes after resolve()
   }
 
   show() {
@@ -35,7 +53,10 @@ class App {
           <inner-tag></inner-tag>
 
           <app-header></app-header>
-          <home></home>
+          <home if={this.state === 'home'}></home>
+          <div if={this.state === 'away'}>
+            <h1 style="color: blue; text-align: center">Away tab</h1>
+          </div>
           <app-footer></app-footer>
       </div>
     )

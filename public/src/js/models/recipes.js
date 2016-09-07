@@ -18,7 +18,8 @@ class Recipes extends Base {
   }
 
   create(recipe) {
-    return fetch('/users', {
+    console.log(recipe)
+    return fetch('/api/recipes', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',

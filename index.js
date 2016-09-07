@@ -8,10 +8,8 @@ const app = express();
 app.use(express.static('public/bin'));
 
 // parse request params into req.body
-app.use(bodyParser.urlencoded({
-	// type is default but who cares
-	type: 'application/x-www-form-urlencoded',
-	extended: true
+app.use(bodyParser.json({
+    type: 'application/json'
 }));
 
 app.get('/', (req, res) => {
@@ -49,6 +47,86 @@ app.get('/api/recipes', (req, res) => {
         });
 });
 
+app.post('/api/recipes', (req, res) => {
+    let { recipeName, recipeDescription, minutesToCook,
+        category, products} = req.body;
+
+    console.log( recipeName, recipeDescription, minutesToCook, category, products);
+
+    knex.transaction(trx => {
+
+        // insert recipe
+        return trx
+            .insert({
+                name: recipeName, 
+                description: recipeDescription, 
+                minutes_to_cook: minutesToCook
+            }, 'id')
+            .into('recipes')
+            .then(recipeId => {
+                recipeId = recipeId[0];
+                console.log('inserted recipeID', recipeId);
+                // insert category
+                return new Promise((resolve, reject) => {
+                    // link recipe to category in pivot table
+                    // returns categoryId in resolver
+                    function setRecipeCategory(recipeId, categoryId) {
+                        return trx
+                            .insert({
+                                categorisable_id: recipeId,
+                                categorisable_type: 'recipes',
+                                category_id: categoryId
+                            })
+                            .into('categorisables')
+                            .then(() => categoryId);
+                    }
+
+                    const categoryId = category.id;
+                    if (categoryId) {
+                        return setRecipeCategory(recipeId, categoryId)
+                            .then(resolve)
+                            .catch(reject);
+                    } else {
+                        // no such category, create one, then insert
+                        return trx
+                            .insert({name: category.name}, 'id')
+                            .into('categories')
+                            .then(categoryId => {
+                                return setRecipeCategory(recipeId, categoryId);
+                            })
+                            .then(resolve)
+                            .catch(reject);
+                    }
+                })
+                .then(categoryId => {
+                    console.log('inserted categoryId', categoryId);
+                    // TODO: insert products
+                    return Promise.all([]);
+                });
+
+            })
+
+    })
+    .then(inserts => {
+        console.log('inserts: ', inserts);
+        const msg = `done`;
+        // TODO: how to return the new recipe here? + new products if any
+        res
+            .status(200)
+            .json({
+                msg: msg
+            });
+    })
+    .catch(err => {
+        console.log(err);
+        res
+            .status(500)
+            .json({
+                error: err
+            });
+    });
+});
+
 app.get('/api/categories', (req, res) => {
     knex
         .select()
@@ -57,7 +135,7 @@ app.get('/api/categories', (req, res) => {
             res
                 .status(200)
                 .json(categories);
-        })
+        });
 });
 
 app.get('/api/products', (req, res) => {
@@ -68,7 +146,7 @@ app.get('/api/products', (req, res) => {
             res
                 .status(200)
                 .json(products);
-        })
+        });
 });
 
 app.listen(8080, () => console.log('API listening on port 8080'));

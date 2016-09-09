@@ -51,7 +51,9 @@ app.post('/api/recipes', (req, res) => {
     let { recipeName, recipeDescription, minutesToCook,
         category, products} = req.body;
 
-    console.log( recipeName, recipeDescription, minutesToCook, category, products);
+    // TODO: params validation
+
+    //console.log( recipeName, recipeDescription, minutesToCook, category, products);
 
     knex.transaction(trx => {
 
@@ -100,21 +102,58 @@ app.post('/api/recipes', (req, res) => {
                 })
                 .then(categoryId => {
                     console.log('inserted categoryId', categoryId);
-                    // TODO: insert products
-                    return Promise.all([]);
+
+                    function setRecipeProduct(recipeId, productId, quantity) {
+                        return trx
+                            .insert({
+                                product_id: productId,
+                                recipe_id: recipeId,
+                                quantity: quantity
+                            })
+                            .into('product_recipes')
+                            .then(() => productId);
+                    }
+
+                    let productInsertPromises = [];
+                    products.forEach(product => {
+                        let productPromise = new Promise((resolve, reject) => {
+                            const productId = product.id;
+                            if (productId) {
+                                return setRecipeProduct(recipeId, productId, product.qty)
+                                .then(resolve)
+                                .catch(reject);
+                            } else {
+                                // no such product, create one then set to this recipe
+                                return trx
+                                    .insert({name: product.name}, 'id')
+                                    .into('products')
+                                    .then(productId => {
+                                        return setRecipeProduct(recipeId, productId, product.qty);
+                                    })
+                                    .then(resolve)
+                                    .catch(reject);
+                            }
+                        });
+
+                        productInsertPromises.push(productPromise);
+                    });
+
+                    return Promise.all(productInsertPromises)
+                        .then(productIds => {
+                            console.log(`inserted ${productIds.length} products`);
+
+                            return 'All records inserted';
+                        });
                 });
-
             })
-
     })
-    .then(inserts => {
-        console.log('inserts: ', inserts);
-        const msg = `done`;
+    .then(successMsg => {
+        console.log(successMsg);
         // TODO: how to return the new recipe here? + new products if any
         res
             .status(200)
             .json({
-                msg: msg
+                msg: successMsg
             });
     })
     .catch(err => {

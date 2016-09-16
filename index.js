@@ -20,6 +20,7 @@ app.get('/api/recipes', (req, res) => {
     knex
         .select(
             '*', 
+            'recipes.id as id',
             'recipes.name as recipe_name', 
             'categories.name as category_name'
         )
@@ -45,6 +46,17 @@ app.get('/api/recipes', (req, res) => {
                 .status(200)
                 .json(recipes);
         });
+});
+
+app.get('/api/recipes/:id', (req, res) => {
+    console.log(req.params.id);
+
+    // TODO: query db, return recipe with category and products ids
+    // make it the same as get all recipes
+
+    res
+        .status(200)
+        .json({});
 });
 
 app.post('/api/recipes', (req, res) => {
@@ -164,6 +176,10 @@ app.post('/api/recipes', (req, res) => {
                 error: err
             });
     });
+});
+
+app.put('/api/recipes', (req, res) => {
+    // TODO: edit recipe. Reuse from post recipe
 });
 
 app.get('/api/categories', (req, res) => {

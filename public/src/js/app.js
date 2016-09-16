@@ -13,6 +13,7 @@ class App {
 
     oval.router = new Navigo()
     oval.router.state = null
+    this.routeParams = null
     oval.router.on({
       '/recipe/add': {
         as: 'recipe.add',
@@ -23,7 +24,8 @@ class App {
       },
       '/recipe/:id/edit': {
         as: 'recipe.edit',
-        uses: () => {
+        uses: (params) => {
+          this.routeParams = params
           oval.router.state = 'recipe.edit'
           this.update()
         }
@@ -53,6 +55,7 @@ class App {
 
         <home if={oval.router.state === 'home'}></home>
         <recipe-addedit if={oval.router.state === 'recipe.add'}></recipe-addedit>
+        <recipe-addedit if={oval.router.state === 'recipe.edit'} prop-id={this.routeParams.id}></recipe-addedit>
 
         <app-footer></app-footer>
       </div>

@@ -29,7 +29,14 @@ class RecipeList {
               <td>{recipe.name}</td>
               <td>{recipe.category}</td>
               <td>{recipe.minutesToCook}</td>
-              <td><button class="button button-clear">Редактирай</button></td>
+              <td>
+                <a 
+                  href={`#${oval.router.generate('recipe.edit', {id: recipe.id})}`} 
+                  class="button button-clear" 
+                  data-navigo>
+                    Редактирай
+                </a>
+              </td>
             </tr>
           </each>
         </tbody>

@@ -5,8 +5,10 @@ class Recipes extends Base {
     super()
   }
 
-  get() {
-      /*{
+  get(id) {
+      /*
+      Recipe format
+      {
         "id": Number,
         "name": "String",
         "description": "String",
@@ -14,11 +16,16 @@ class Recipes extends Base {
         "categoryId": Number,
         "category": "String"
       },*/
-      return this.fetch('/recipes')
+      if (id) {
+        // one
+        return this.fetch(`/recipes/${id}`)
+      } else {
+        // all
+        return this.fetch('/recipes')
+      }
   }
 
   create(recipe) {
-    console.log(recipe)
     return fetch('/api/recipes', {
       method: 'POST',
       headers: {

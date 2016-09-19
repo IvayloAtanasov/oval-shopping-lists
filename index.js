@@ -1,6 +1,8 @@
 const dbConfig = require('./knexfile').development;
 const knex = require('knex')(dbConfig);
 
+const recipes = require('./dao/recipes');
+
 const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
@@ -16,21 +18,27 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/bin/index.html');
 });
 
+/**
+ * Request body:
+ * {}
+ *
+ * Response body:
+ * [{
+ *     id: Number,
+ *     name: String,
+ *     description: String,
+ *     minutesToCook: Number,
+ *     categoryId: Number,
+ *     category: String
+ * }]
+ */
 app.get('/api/recipes', (req, res) => {
-    knex
-        .select(
-            '*', 
-            'recipes.id as id',
-            'recipes.name as recipe_name', 
-            'categories.name as category_name'
-        )
-        .from('recipes')
-        .leftJoin('categorisables', function() {
-            this.on('recipes.id', '=', 'categorisables.categorisable_id')
-                .on(knex.raw("'recipes' = categorisables.categorisable_type"))
-        })
-        .leftJoin('categories', 'categorisables.category_id', 'categories.id')
-        .then((recipes) => {
+    recipes
+        .builder()
+        .select('*')
+        .categories()
+        .then(recipes => {
+            console.log(recipes)
             // format response
             recipes = recipes.map((recipe) => {
                 return {
@@ -42,6 +50,7 @@ app.get('/api/recipes', (req, res) => {
                     category: recipe.category_name
                 };
             });
+
             res
                 .status(200)
                 .json(recipes);
@@ -49,14 +58,39 @@ app.get('/api/recipes', (req, res) => {
 });
 
 app.get('/api/recipes/:id', (req, res) => {
-    console.log(req.params.id);
+    const recipeId = req.params.id;
 
-    // TODO: query db, return recipe with category and products ids
-    // make it the same as get all recipes
+    recipes
+        .builder()
+        .find(recipeId)
+        .select('*')
+        .categories()
+        .then(recipes => {
+            if (recipes.length) {
+                // found
+                let recipe = recipes[0];
+                // format response
+                recipe = {
+                    id: recipe.id,
+                    name: recipe.recipe_name,
+                    description: recipe.description,
+                    minutesToCook: recipe.minutes_to_cook,
+                    categoryId: recipe.category_id,
+                    category: recipe.category_name
+                };
 
-    res
-        .status(200)
-        .json({});
+                res
+                    .status(200)
+                    .json(recipe);
+            } else {
+                res
+                    .status(404)
+                    .json({
+                        error: 'Recipe not found.'
+                    });
+            }
+
+        });
 });
 
 app.post('/api/recipes', (req, res) => {

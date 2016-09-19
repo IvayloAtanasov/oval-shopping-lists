@@ -24,32 +24,30 @@ app.get('/', (req, res) => {
  *
  * Response body:
  * [{
- *     id: Number,
- *     name: String,
- *     description: String,
- *     minutesToCook: Number,
- *     categoryId: Number,
- *     category: String
+ *     "id": Number,
+ *     "name": String,
+ *     "description": String,
+ *     "minutesToCook": Number,
+ *     "categoryId": Number,
+ *     "category": String,
+ *     "products": [
+ *       {
+ *         "id": Number,
+ *         "name": String,
+ *         "quantity": String
+ *       }
+ *     ]
  * }]
  */
 app.get('/api/recipes', (req, res) => {
     recipes
         .builder()
         .select('*')
-        .categories()
+        .joinCategories()
+        .joinProducts()
         .then(recipes => {
-            console.log(recipes)
             // format response
-            recipes = recipes.map((recipe) => {
-                return {
-                    id: recipe.id,
-                    name: recipe.recipe_name,
-                    description: recipe.description,
-                    minutesToCook: recipe.minutes_to_cook,
-                    categoryId: recipe.category_id,
-                    category: recipe.category_name
-                };
-            });
+            recipes = compactRecipesIntoJson(recipes);
 
             res
                 .status(200)
@@ -57,6 +55,27 @@ app.get('/api/recipes', (req, res) => {
         });
 });
 
+/**
+ * Request body:
+ * {}
+ *
+ * Response body:
+ * {
+ *     "id": Number,
+ *     "name": String,
+ *     "description": String,
+ *     "minutesToCook": Number,
+ *     "categoryId": Number,
+ *     "category": String,
+ *     "products": [
+ *       {
+ *         "id": Number,
+ *         "name": String,
+ *         "quantity": String
+ *       }
+ *     ]
+ * }
+ */
 app.get('/api/recipes/:id', (req, res) => {
     const recipeId = req.params.id;
 
@@ -64,34 +83,71 @@ app.get('/api/recipes/:id', (req, res) => {
         .builder()
         .find(recipeId)
         .select('*')
-        .categories()
-        .then(recipes => {
-            if (recipes.length) {
-                // found
-                let recipe = recipes[0];
-                // format response
-                recipe = {
-                    id: recipe.id,
-                    name: recipe.recipe_name,
-                    description: recipe.description,
-                    minutesToCook: recipe.minutes_to_cook,
-                    categoryId: recipe.category_id,
-                    category: recipe.category_name
-                };
-
-                res
-                    .status(200)
-                    .json(recipe);
-            } else {
-                res
+        .joinCategories()
+        .joinProducts()
+        .then(records => {
+            if (!records.length) {
+                return res
                     .status(404)
                     .json({
                         error: 'Recipe not found.'
                     });
             }
 
+            // found
+            // compact records into recipe objects
+            const recipes = compactRecipesIntoJson(records);
+
+            if (recipes.length !== 1)
+                throw new Error('Response records should contain only one recipe!');
+
+            // format response
+            let recipe = recipes[0];
+
+            return res
+                .status(200)
+                .json(recipe);
         });
 });
+
+// TODO: export in route file as private helper
+function compactRecipesIntoJson(records) {
+    let recipes = {};
+    records.forEach(record => {
+        const recipeId = record.id;
+        if (recipeId in recipes) {
+            // add products of existing recipe
+            recipes[recipeId].products.push({
+                id: record.product_id,
+                name: record.product_name,
+                quantity: record.quantity
+            });
+        } else {
+            // add new recipe to list
+            let products = [];
+            if (record.product_id) {
+                products.push({
+                    id: record.product_id,
+                    name: record.product_name,
+                    quantity: record.quantity
+                });
+            }
+            recipes[recipeId] = {
+                id: recipeId,
+                name: record.recipe_name,
+                description: record.description,
+                minutesToCook: record.minutes_to_cook,
+                categoryId: record.category_id,
+                category: record.category_name,
+                products: products
+            };
+        }
+    });
+    // cast to array
+    const recipesList = Object.keys(recipes).map(recipeId => recipes[recipeId]);
+
+    return recipesList;
+}
 
 app.post('/api/recipes', (req, res) => {
     let { recipeName, recipeDescription, minutesToCook,

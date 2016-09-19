@@ -31,6 +31,10 @@ class Base {
     then(callback) {
         return this.query.then(resolved => callback(resolved));
     }
+
+    builderEnd() {
+        return this.query;
+    }
 }
 
 module.exports = Base;

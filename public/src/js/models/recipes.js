@@ -36,6 +36,22 @@ class Recipes extends Base {
     })
     .then((res) => console.log(res))
   }
+
+  update(id, recipe) {
+    return fetch(`/api/recipes/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(recipe)
+    })
+    .then((res) => console.log(res))
+  }
+
+  delete(id) {
+
+  }
 }
 
 module.exports = new Recipes()

@@ -7,18 +7,40 @@ class RecipeAddedit {
   constructor(rootEl, props, attrs) {
     oval.BaseTag(this, rootEl, props, attrs)
 
-    this.editMode = false
-    if (oval.router.state === 'recipe.edit') {
-      this.editMode = true
+    // set initial form values
+    this.products = [{id: null, quantity: null}]
+
+    this.editMode = oval.router.state === 'recipe.edit'
+    if (this.editMode) {
       const recipeId = this.props.id
-      // TODO: 1. find recipe, attach products and category from other models
-      // 2. some kind of "hey model, please fetch and attach all relations fn"?
-      // 3. expose to this.refs
+
       recipes.get(recipeId)
         .then(recipe => {
           console.log(recipe)
+          // reset products array first
+          // this fixes null first input row values bug when reasigning products
+          this.products = []
+          this.update()
+
+          this.id = recipe.id
+          this.name = recipe.name
+          this.description = recipe.description
+          this.minutesToCook = recipe.minutesToCook
+          this.categoryId = recipe.categoryId
+          this.products = recipe.products
+          this.update()
         })
     }
+
+    // load products and categories in datalists
+    this.allCategories = []
+    this.allProducts = []
+    const categoriesPromise = categories.get()
+      .then(categories => this.allCategories = categories)
+    const productsPromise = products.get()
+      .then(products => this.allProducts = products)
+    Promise.all([categoriesPromise, productsPromise])
+      .then(() => this.update())
 
     this.submit = (e) => {
       e.preventDefault()
@@ -76,28 +98,26 @@ class RecipeAddedit {
         products: products
       }
 
-      recipes.create(recipe)
-        .then(() => {
-          // redirect home
-          oval.router.navigate('/')
-        })
+      // call API
+      if (this.editMode) {
+        recipes.update(this.id, recipe)
+          .then(() => {
+            // redirect home
+            oval.router.navigate('/')
+          })
+      } else {
+        recipes.create(recipe)
+          .then(() => {
+            // redirect home
+            oval.router.navigate('/')
+          })
+      }
     }
 
     this.addProductRow = () => {
-      this.products.push({})
+      this.products.push({id: null, quantity: null})
       this.update()
     }
-
-    // load products and categories in datalists
-    this.categories = []
-    this.products = [{}]
-    this.allProducts = []
-    const categoriesPromise = categories.get()
-      .then(categories => this.categories = categories)
-    const productsPromise = products.get()
-      .then(products => this.allProducts = products)
-    Promise.all([categoriesPromise, productsPromise])
-      .then(() => this.update())
   }
 
   render(createElement) {
@@ -107,24 +127,43 @@ class RecipeAddedit {
           <form onsubmit={this.submit}>
             <fieldset>
               <label for="recipeName">Име</label>
-              <input type="text" placeholder="Пълнени чушки (not to be confused with пиперки)" id="recipeName" ref="recipeName" />
+              <input 
+                type="text" 
+                placeholder="Пълнени чушки (not to be confused with пиперки)" 
+                id="recipeName" 
+                ref="recipeName"
+                value={this.name} />
               <label for="recipeDescription">Описание</label>
-              <textarea placeholder="Намери си чушки..." id="recipeDescription" ref="recipeDescription"></textarea>
+              <textarea 
+                placeholder="Намери си чушки..." 
+                id="recipeDescription" 
+                ref="recipeDescription">
+                {this.description}
+              </textarea>
               <label for="minutesToCook">Време за приготвяне (в минути)</label>
-              <input type="number" placeholder="30" id="minutesToCook" ref="minutesToCook" />
-              <input type="text" list="category" ref="category" />
+              <input 
+                type="number" 
+                placeholder="30" 
+                id="minutesToCook" 
+                ref="minutesToCook"
+                value={this.minutesToCook} />
+              <input 
+                type="text" 
+                list="category" 
+                ref="category" 
+                value={this.categoryId} />
               <datalist id="category">
-                <each category, index in {this.categories}>
+                <each category, index in {this.allCategories}>
                   <option value={category.id}>{category.name}</option>
                 </each>
               </datalist>
               <each product, index in {this.products}>
                 <div class="row">
                   <div class="column column-80">
-                    <input type="text" list="products" ref={`product-${index}`} />
+                    <input type="text" list="products" ref={`product-${index}`} value={product.id} />
                   </div>
                   <div class="column column-15 column-offset-5">
-                    <input type="text" placeholder="100 кг" ref={`productQty-${index}`} />
+                    <input type="text" placeholder="100 кг" ref={`productQty-${index}`} value={product.quantity} />
                   </div>
                 </div>
               </each>

@@ -50,7 +50,14 @@ class Recipes extends Base {
   }
 
   delete(id) {
-
+    return fetch(`/api/recipes/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then((res) => console.log(res))
   }
 }
 

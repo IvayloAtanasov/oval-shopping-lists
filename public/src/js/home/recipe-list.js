@@ -5,11 +5,21 @@ class RecipeList {
   constructor(rootEl, props, attrs) {
     oval.BaseTag(this, rootEl, props, attrs)
 
-    this.recipes = [];
-    recipes.get().then((recipes) => {
-      this.recipes = recipes
-      this.update()
-    })
+    this.recipes = []
+
+    this.getRecipes = () => {
+      return recipes.get()
+        .then(recipes => {
+          this.recipes = recipes
+          this.update()
+        })
+    }
+    this.getRecipes()
+
+    this.deleteRecipe = (recipeId) => {
+      return recipes.delete(recipeId)
+        .then(this.getRecipes)
+    }
   }
 
   render(createElement) {
@@ -17,25 +27,30 @@ class RecipeList {
       <table>
         <thead>
           <tr>
-            <th>Име</th>
-            <th>Категория</th>
-            <th>Време за приготвяне</th>
-            <th>Действия</th>
+            <th colspan="1">Име</th>
+            <th colspan="1">Категория</th>
+            <th colspan="1">Минути</th>
+            <th colspan="4">Действия</th>
           </tr>
         </thead>
         <tbody>
           <each recipe, index in {this.recipes}>
             <tr>
-              <td>{recipe.name}</td>
-              <td>{recipe.category}</td>
-              <td>{recipe.minutesToCook}</td>
-              <td>
+              <td colspan="1">{recipe.name}</td>
+              <td colspan="1">{recipe.category}</td>
+              <td colspan="1">{recipe.minutesToCook}</td>
+              <td colspan="4">
                 <a 
                   href={`#${oval.router.generate('recipe.edit', {id: recipe.id})}`} 
-                  class="button button-clear" 
+                  class="button button-clear button-small" 
                   data-navigo>
                     Редактирай
                 </a>
+                <button 
+                  class="button button-clear button-small"
+                  onclick={this.deleteRecipe.bind(this, recipe.id)}>
+                    Изтрий
+                </button>
               </td>
             </tr>
           </each>

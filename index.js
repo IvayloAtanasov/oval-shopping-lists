@@ -182,7 +182,6 @@ app.post('/api/recipes', (req, res) => {
     recipes
         .insert(recipeName, recipeDescription, minutesToCook, category, products)
         .then(successMsg => {
-            console.log(successMsg);
             // TODO: how to return the new recipe here? + new products if any
             res
                 .status(200)
@@ -200,6 +199,29 @@ app.post('/api/recipes', (req, res) => {
         });
 });
 
+
+/**
+ * Request body:
+ * { 
+ *     recipeName: String, 
+ *     recipeDescription: String, 
+ *     minutesToCook: Number,
+ *     category: {
+ *         id: Number [Optional],
+ *         name: String [Optional]
+ *     }, 
+ *     products: [{
+ *         id: Number [Optional],
+ *         name: String [Optional],
+ *         qty: String
+ *     }]
+ * }
+ *
+ * Response body:
+ * {
+ *     msg: String
+ * }
+ */
 app.put('/api/recipes/:id', (req, res) => {
     const recipeId = req.params.id;
     const { recipeName, recipeDescription, minutesToCook,
@@ -209,13 +231,12 @@ app.put('/api/recipes/:id', (req, res) => {
 
     recipes
         .update(recipeId, recipeName, recipeDescription, minutesToCook, category, products)
-        .then(successMsg => {
-            console.log(successMsg);
+        .then(() => {
             // TODO: how to return the updated recipe here? + new products if any
             res
                 .status(200)
                 .json({
-                    msg: successMsg
+                    msg: `Recipe updated (with new id)`
                 });
         })
         .catch(err => {

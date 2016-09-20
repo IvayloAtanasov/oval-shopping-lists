@@ -146,7 +146,7 @@ class Recipes extends Base {
                 .from('product_recipes')
                 .where('recipe_id', recipeId)
                 .then(deletedCount => {
-                    console.log(`Deleted ${deletedCount} records from product recipes.`);
+                    //console.log(`Deleted ${deletedCount} records from product recipes.`);
                     // detach category - delete from categorisables
                     return trx
                         .del()
@@ -155,7 +155,9 @@ class Recipes extends Base {
                             categorisable_id: recipeId,
                             categorisable_type: 'recipes'
                         })
-                        .then(deletedCount => console.log(`Detached ${deletedCount} categories from recipe.`));
+                        .then(deletedCount => {
+                            //console.log(`Detached ${deletedCount} categories from recipe.`);
+                        });
                 })
                 .then(() => {
                     // delete recipe
@@ -163,13 +165,26 @@ class Recipes extends Base {
                         .del()
                         .from(this.table)
                         .where('id', recipeId)
-                        .then(deletedCount => console.log(`Deleted ${deletedCount} recipe`));
+                        .then(deletedCount => {
+                            //console.log(`Deleted ${deletedCount} recipe`)
+                        });
                 });
         });
     }
 
     update(recipeId, recipeName, recipeDescription, minutesToCook, category, products) {
 
+        const deletePromise = this
+            .delete(recipeId);
+
+        const insertPromise = this
+            .insert(recipeName, recipeDescription, minutesToCook, category, products);
+
+        // TODO: since I couldn't make a transaction out of transactions,
+        // update is performed with a simple promise.
+        // Note that insert happens before delete so we don't permanently erase something by mistake.
+        return Promise.all([insertPromise, deletePromise])
+            .catch(err => console.log(error));
     }
 
 }

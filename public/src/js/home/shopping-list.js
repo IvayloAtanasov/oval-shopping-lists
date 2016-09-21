@@ -3,6 +3,10 @@ const oval = require('organic-oval')
 class ShoppingList {
   constructor(rootEl, props, attrs) {
     oval.BaseTag(this, rootEl, props, attrs)
+
+    this.removeItem = (id) => {
+
+    }
   }
 
   render(createElement) {
@@ -13,14 +17,23 @@ class ShoppingList {
             <tr>
               <th>Име</th>
               <th>Категория</th>
-              <th>Време за приготвяне</th>
+              <th>Минути</th>
+              <th>Действия</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr class="recipe-row">
               <td>Stephen Curry</td>
               <td>27</td>
               <td>1,91</td>
+              <td>
+                <button 
+                  type="button"
+                  class="button button-clear button-small"
+                  onclick={this.removeItem.bind(this, 1)}>
+                    <i class="fa fa-calendar-times-o fa-2" aria-hidden="true"></i>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>

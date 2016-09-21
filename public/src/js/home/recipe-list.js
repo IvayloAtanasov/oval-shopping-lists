@@ -17,8 +17,15 @@ class RecipeList {
     this.getRecipes()
 
     this.deleteRecipe = (recipeId) => {
-      return recipes.delete(recipeId)
-        .then(this.getRecipes)
+      const deleteConfirmed = confirm(`Sure you want to delete recipe ${recipeId}, mate?`)
+      if (deleteConfirmed) {
+        return recipes.delete(recipeId)
+          .then(this.getRecipes)
+      }
+    }
+
+    this.addToShoppingList = (recipeId) => {
+      console.log(recipeId)
     }
   }
 
@@ -35,7 +42,7 @@ class RecipeList {
         </thead>
         <tbody>
           <each recipe, index in {this.recipes}>
-            <tr>
+            <tr class="recipe-row">
               <td colspan="1">{recipe.name}</td>
               <td colspan="1">{recipe.category}</td>
               <td colspan="1">{recipe.minutesToCook}</td>
@@ -44,12 +51,19 @@ class RecipeList {
                   href={`#${oval.router.generate('recipe.edit', {id: recipe.id})}`} 
                   class="button button-clear button-small" 
                   data-navigo>
-                    Редактирай
+                    <i class="fa fa-pencil-square-o fa-2" aria-hidden="true"></i>
                 </a>
                 <button 
+                  type="button"
                   class="button button-clear button-small"
                   onclick={this.deleteRecipe.bind(this, recipe.id)}>
-                    Изтрий
+                    <i class="fa fa-bomb fa-2" aria-hidden="true"></i>
+                </button>
+                <button 
+                  type="button"
+                  class="button button-clear button-small"
+                  onclick={this.addToShoppingList.bind(this, recipe.id)}>
+                    <i class="fa fa-calendar-plus-o fa-2" aria-hidden="true"></i>
                 </button>
               </td>
             </tr>

@@ -6,3 +6,12 @@
 .recipe-controls {
 	padding-top: 45px;
 }
+
+.fa-2 {
+    font-size: 2em;
+    vertical-align: middle;
+}
+
+.recipe-row .button {
+    padding: 0 1rem;
+}

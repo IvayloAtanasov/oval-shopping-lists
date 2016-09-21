@@ -33,14 +33,51 @@ class RecipeAddedit {
     }
 
     // load products and categories in datalists
-    this.allCategories = []
-    this.allProducts = []
-    const categoriesPromise = categories.get()
-      .then(categories => this.allCategories = categories)
-    const productsPromise = products.get()
-      .then(products => this.allProducts = products)
-    Promise.all([categoriesPromise, productsPromise])
-      .then(() => this.update())
+    this.injectDirectives({
+      'products-autocomplete': (tag, directiveName) => {
+        return {
+          postCreate: (el, directiveValue) => {
+            products.get()
+              .then(products => {
+
+                // reselect element in DOM
+                // this fixes "Cannot read property 'insertBefore' of null" in autocomplete.js
+                const refAttr = el.attributes['ref'].value
+                el = document.querySelector(`input[ref="${refAttr}"]`)
+
+                const productOptions = Array.from(products, product => {
+                  return {label: product.name, value: product.id}
+                })
+
+                new Awesomplete(el, {
+                  list: productOptions
+                })
+              })
+          }
+        }
+      },
+      'categories-autocomplete': (tag, directiveName) => {
+        return {
+          postCreate: (el, directiveValue) => {
+            // TODO: why the hell is this called 4 times in a row?
+            categories.get()
+              .then(categories => {
+                // reselect element in DOM to get parent reference
+                const refAttr = el.attributes['ref'].value
+                el = document.querySelector(`input[ref="${refAttr}"]`)
+
+                const categoryOptions = Array.from(categories, category => {
+                  return {label: category.name, value: category.id}
+                })
+
+                new Awesomplete(el, {
+                  list: categoryOptions
+                })
+              })
+          }
+        }
+      }
+    })
 
     this.submit = (e) => {
       e.preventDefault()
@@ -147,31 +184,23 @@ class RecipeAddedit {
                 id="minutesToCook" 
                 ref="minutesToCook"
                 value={this.minutesToCook} />
-              <input 
+              <input categories-autocomplete
                 type="text" 
-                list="category" 
                 ref="category" 
                 value={this.categoryId} />
-              <datalist id="category">
-                <each category, index in {this.allCategories}>
-                  <option value={category.id}>{category.name}</option>
-                </each>
-              </datalist>
               <each product, index in {this.products}>
                 <div class="row">
                   <div class="column column-80">
-                    <input type="text" list="products" ref={`product-${index}`} value={product.id} />
+                    <input products-autocomplete 
+                      type="text"
+                      ref={`product-${index}`} 
+                      value={product.id} />
                   </div>
                   <div class="column column-15 column-offset-5">
                     <input type="text" placeholder="100 кг" ref={`productQty-${index}`} value={product.quantity} />
                   </div>
                 </div>
               </each>
-              <datalist id="products">
-                <each product, index in {this.allProducts}>
-                  <option value={product.id}>{product.name}</option>
-                </each>
-              </datalist>
               <div class="row">
                 <div class="column column-10 column-offset-90">
                   <div class="float-right">
@@ -183,6 +212,8 @@ class RecipeAddedit {
             </fieldset>
           </form>
         </section>
+        
+        
       </div>
     )
   }

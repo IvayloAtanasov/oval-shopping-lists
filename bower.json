@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "milligram": "^1.1.0",
-    "font-awesome": "fontawesome#^4.6.3"
+    "font-awesome": "fontawesome#^4.6.3",
+    "awesomplete": "https://github.com/LeaVerou/awesomplete.git#1.1.1"
   }
 }

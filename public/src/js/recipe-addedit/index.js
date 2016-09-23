@@ -26,7 +26,7 @@ class RecipeAddedit {
           this.name = recipe.name
           this.description = recipe.description
           this.minutesToCook = recipe.minutesToCook
-          this.categoryId = recipe.categoryId
+          this.categoryName = recipe.category
           this.products = recipe.products
           this.update()
         })
@@ -36,44 +36,46 @@ class RecipeAddedit {
     this.injectDirectives({
       'products-autocomplete': (tag, directiveName) => {
         return {
-          postCreate: (el, directiveValue) => {
-            products.get()
-              .then(products => {
+          postCreate: (el, productsList) => {
+            // reselect element in DOM
+            // this fixes "Cannot read property 'insertBefore' of null" in autocomplete.js
+            const refAttr = el.attributes['ref'].value
+            el = document.querySelector(`body input[ref="${refAttr}"]`)
 
-                // reselect element in DOM
-                // this fixes "Cannot read property 'insertBefore' of null" in autocomplete.js
-                const refAttr = el.attributes['ref'].value
-                el = document.querySelector(`input[ref="${refAttr}"]`)
+            const productOptions = Array.from(productsList, product => {
+              return {label: product.name, value: product.name}
+            })
 
-                const productOptions = Array.from(products, product => {
-                  return {label: product.name, value: product.id}
-                })
-
-                new Awesomplete(el, {
-                  list: productOptions
-                })
+            // init with timeout just because..
+            // http://stackoverflow.com/questions/37495059/failed-to-execute-removechild-on-node-parameter-1-is-not-of-type-node
+            setTimeout(() => {
+              new Awesomplete(el, {
+                list: productOptions
               })
+            })
           }
         }
       },
       'categories-autocomplete': (tag, directiveName) => {
         return {
-          postCreate: (el, directiveValue) => {
-            // TODO: why the hell is this called 4 times in a row?
-            categories.get()
-              .then(categories => {
-                // reselect element in DOM to get parent reference
-                const refAttr = el.attributes['ref'].value
-                el = document.querySelector(`input[ref="${refAttr}"]`)
+          postCreate: (el, categoriesList) => {
+            // reselect element in DOM to get parent reference
+            const refAttr = el.attributes['ref'].value
+            el = document.querySelector(`input[ref="${refAttr}"]`)
 
-                const categoryOptions = Array.from(categories, category => {
-                  return {label: category.name, value: category.id}
-                })
+            const categoryOptions = Array.from(categoriesList, category => {
+              return {label: category.name, value: category.name}
+            })
 
-                new Awesomplete(el, {
-                  list: categoryOptions
-                })
+            // Timeout fixes DOMException: 
+            // Failed to execute 'insertBefore' on 'Node': 
+            // The node before which the new node is to be inserted is not a child of this node.
+            // similar to the problem with products-autocomplete
+            setTimeout(() => {
+              new Awesomplete(el, {
+                list: categoryOptions
               })
+            })
           }
         }
       }
@@ -94,11 +96,13 @@ class RecipeAddedit {
         id: null,
         name: null
       }
-      // if category is new, the name will be passed
-      if (isNaN(values.category)) {
-        category.name = values.category
+      // map category to id
+      const categoryId = this.findIdByName(this.allCategories, values.category)
+      if (categoryId) {
+        category.id = categoryId
       } else {
-        category.id = values.category
+        // if not found in categories list, category is new
+        category.name = values.category
       }
 
       // format products and quantities
@@ -111,11 +115,14 @@ class RecipeAddedit {
             name: null,
             qty: null
           }
-          // TODO: this repeats the code above
-          if (isNaN(values[key])) {
-            product.name = values[key]
+          // map input content to id
+          const productId = this.findIdByName(this.allProducts, values[key])
+          if (productId) {
+            // product already exist, set id
+            product.id = productId
           } else {
-            product.id = values[key]
+            // product is new, set as name, id remains null
+            product.name = values[key]
           }
           // insert on position extracted from key
           const position = key.split('-')[1]
@@ -155,6 +162,26 @@ class RecipeAddedit {
       this.products.push({id: null, quantity: null})
       this.update()
     }
+
+    this.allProducts = []
+    products.get()
+      .then(products => {
+        this.allProducts = products
+        this.update()
+      })
+
+    this.allCategories = []
+    categories.get()
+      .then(categories => {
+        this.allCategories = categories
+        this.update()
+      })
+
+    this.findIdByName = (collecton, name) => {
+      console.log(collecton)
+      const found = collecton.find(entry => entry.name === name)
+      return found ? found.id : 0
+    }
   }
 
   render(createElement) {
@@ -184,17 +211,17 @@ class RecipeAddedit {
                 id="minutesToCook" 
                 ref="minutesToCook"
                 value={this.minutesToCook} />
-              <input categories-autocomplete
+              <input categories-autocomplete={this.allCategories}
                 type="text" 
                 ref="category" 
-                value={this.categoryId} />
+                value={this.categoryName} />
               <each product, index in {this.products}>
                 <div class="row">
                   <div class="column column-80">
-                    <input products-autocomplete 
+                    <input products-autocomplete={this.allProducts}
                       type="text"
                       ref={`product-${index}`} 
-                      value={product.id} />
+                      value={product.name} />
                   </div>
                   <div class="column column-15 column-offset-5">
                     <input type="text" placeholder="100 кг" ref={`productQty-${index}`} value={product.quantity} />

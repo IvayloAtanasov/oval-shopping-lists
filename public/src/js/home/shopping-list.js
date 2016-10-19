@@ -23,9 +23,9 @@ class ShoppingList {
           </thead>
           <tbody>
             <tr class="recipe-row">
-              <td>Stephen Curry</td>
-              <td>27</td>
-              <td>1,91</td>
+              <td>Торта</td>
+              <td>Десерти</td>
+              <td>90</td>
               <td>
                 <button 
                   type="button"

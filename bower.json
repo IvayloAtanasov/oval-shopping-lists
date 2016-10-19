@@ -1,5 +1,5 @@
 {
-  "name": "dagoyadem",
+  "name": "oval-shopping-lists",
   "description": "Web app whose purpose in life is to help me avoid hunger.",
   "main": "app.js",
   "authors": [
@@ -8,8 +8,7 @@
   "license": "ISC",
   "keywords": [
     "food",
-    "recipies",
-    "tvaaslisam"
+    "recipies"
   ],
   "homepage": "",
   "private": true,

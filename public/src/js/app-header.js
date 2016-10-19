@@ -9,7 +9,7 @@ class AppHeader {
     return (
       <header class="header">
         <section class="container">
-          <h1>Да го ядем!</h1>
+          <h1>Да ядем!</h1>
           <p>Добави си рецепти и създай списък за пазаруване</p>
         </section>
       </header>

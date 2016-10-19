@@ -1,6 +1,6 @@
 {
-  "name": "dagoyadem",
-  "version": "0.0.1",
+  "name": "oval-shopping-lists",
+  "version": "0.0.2",
   "description": "Web app whose purpose in life is to help me avoid hunger.",
   "main": "app.js",
   "scripts": {
@@ -11,8 +11,7 @@
   },
   "keywords": [
     "food",
-    "recipies",
-    "tvaaslisam"
+    "recipies"
   ],
   "author": "aivo",
   "license": "ISC",

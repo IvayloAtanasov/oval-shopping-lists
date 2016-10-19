@@ -24,7 +24,7 @@ class RecipeSearch {
           <div class="column column-25 column-offset-25">
             <blockquote>
               "Не е яко да си готин, готино е да си як!"
-              <p>Паоло Ко-не лю</p>
+              <p>Some random guy</p>
             </blockquote>
           </div>
         </div>

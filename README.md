@@ -2,11 +2,11 @@
 
 ## A partial implementation of a shopping lists app with recipies and products implemented with ['organic-oval'](https://github.com/camplight/organic-oval) library.
 
-You should be able to:
+### You should be able to:
 * Perform CRUD operations on all recipes
 * When creating or editing a recipe: add a product or category that already exists via autocomplete
 
-Not implemented features:
+### Not implemented features:
 * Creating a shopping list (ironically)
 * Send email with shopping list
 * Search throught the recipes

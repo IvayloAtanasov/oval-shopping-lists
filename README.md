@@ -1,6 +1,6 @@
 # Oval shopping lists
 
-## A partial implementation of a shopping lists app with recipies and products implemented with ['organic-oval'](https://github.com/camplight/organic-oval) library.
+## A partial implementation of a shopping lists app with recipies and products made with ['organic-oval'](https://github.com/camplight/organic-oval) library.
 
 ### You should be able to:
 * Perform CRUD operations on all recipes
